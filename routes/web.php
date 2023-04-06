@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\EmailController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,26 +19,34 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [BookController::class, 'index'])->name('home');
 
-Route::get('/create-book', [BookController::class, 'createBook']);
+Route::middleware(['auth', 'admin'])->group(function () {
 
-Route::post('/store-book', [BookController::class, 'storeBook']);
+    Route::get('/create-book', [BookController::class, 'createBook']);
+    Route::post('/store-book', [BookController::class, 'storeBook']);
+    //View Update
+    Route::get('/update-book/{id}', [BookController::class, 'updateBookView']);
+    //update data from view
+    Route::patch('/update/{id}', [BookController::class, 'updateBook']);
+    //delete data
+    Route::delete('/delete-book/{id}', [BookController::class, 'deleteBook']);
 
-//View Update
-Route::get('/update-book/{id}', [BookController::class, 'updateBookView']);
+    Route::controller(CategoryController::class)->group(function () {
+        Route::get('/create-category', 'createCategory')->name('createCategory');
+        // store category
+        Route::post('/store-category', 'storeCategory')->name('storeCategory');
+    });
 
-//update data from view
-Route::patch('/update/{id}', [BookController::class, 'updateBook']);
+    Route::controller(EmailController::class)->group(function () {
+        //View Update
+        Route::get('/send-email', 'viewSend')->name('view.sendEmail');
+        Route::post('/post-email', 'sendEmail')->name('sendEmail');
+    });
+    // category view
+});
+// Route::get('/create-book', [BookController::class, 'createBook'])->middleware(['auth', AdminMiddleware::class]);
 
-//delete data
-Route::delete('/delete-book/{id}', [BookController::class, 'deleteBook']);
 
 
-// category view
-Route::get('/create-category', [CategoryController::class, 'createCategory'])->name('createCategory');
-
-
-// store category
-Route::post('/store-category', [CategoryController::class, 'storeCategory'])->name('storeCategory');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -49,4 +58,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

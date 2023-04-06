@@ -22,6 +22,10 @@ return new class extends Migration
             $table->string('pob');
             $table->string('gender');
             $table->string('address');
+            $table->set('roles', [
+                'member',
+                'admin'
+            ])->default('member');
             $table->rememberToken();
             $table->timestamps();
         });
